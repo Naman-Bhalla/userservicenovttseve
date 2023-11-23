@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMapAdapter;
 
@@ -25,15 +26,15 @@ import java.util.*;
 
 @Service
 public class AuthService {
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private PasswordEncoder passwordEncoder;
     private UserRepository userRepository;
     private SessionRepository sessionRepository;
 //    private BCryptPasswordEncoder bCryptPasswordEncodersswordEncoder;
 
-    public AuthService(UserRepository userRepository, SessionRepository sessionRepository) {//} ,BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public AuthService(UserRepository userRepository, SessionRepository sessionRepository , PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
-        this.bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
     }
 
     public ResponseEntity<UserDto> login(String email, String password) throws UserDoesNotExistException {
@@ -45,7 +46,7 @@ public class AuthService {
 
         User user = userOptional.get();
 
-        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -109,7 +110,7 @@ public class AuthService {
 
         User user = new User();
         user.setEmail(email);
-        user.setPassword(bCryptPasswordEncoder.encode(password));
+        user.setPassword(passwordEncoder.encode(password));
         
         User savedUser = userRepository.save(user);
 
